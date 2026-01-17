@@ -143,7 +143,7 @@
     </div>
 
     <!-- Choose a step size -->
-    <label for="stepsize-chooser" class="label">Choose stepsize</label>
+    <label for="stepsize-chooser" class="label">Stepsize</label>
     <div class="join w-full">
         {#each ["10s", "1min", "10min", "1h"] as step}
             <input
