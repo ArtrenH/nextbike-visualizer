@@ -81,29 +81,25 @@
     }
 
     function get_locations(loaded_bike_standing_times, hhmmss) {
-        const targetSec = hhmmss * 60;
-
         return loaded_bike_standing_times
             .filter((item) => {
                 const startSec = dateStringToSeconds(item.start_time);
                 const endSec = dateStringToSeconds(item.end_time);
-                return isTimeInRange(targetSec, startSec, endSec);
+                return isTimeInRange(hhmmss, startSec, endSec);
             })
             .map((item) => [item.latitude, item.longitude]);
     }
 
-    function formatTime(totalMinutes: number): string {
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        // padStart(2, '0') macht aus "8" eine "08"
+    function formatTime(totalSeconds: number): string {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = (totalSeconds % 3600) / 60;
         return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
     }
 </script>
 
 <fieldset
-    class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
+    class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 m-2 shadow-2xl"
 >
-    <legend class="fieldset-legend">Controls</legend>
     <!-- Choose city -->
     <label for="city-chooser" class="label">City</label>
     <select id="city-chooser" class="select" bind:value={selected_city}>
@@ -168,34 +164,46 @@
     Slider soll stepsize respecten und styling ist komisch
 -->
 
-<div class="w-full max-w-lg">
-    <div class="text-center font-mono text-xl mb-2 font-bold text-primary">
-        {formatTime(selected_time)}
+<!-- Time, fixed at the top right -->
+<div
+    class="fixed top-2 right-4 text-center font-mono text-5xl mb-2 font-bold text-primary bg-base-200 rounded-box p-1.5"
+>
+    {formatTime(selected_time)}
+</div>
+
+<div
+    class="fixed bottom-0 w-screen bg-base-200 border-base-300 border shadow-2xl"
+>
+    <div class="absolute top-0 -translate-y-full right-0 bg-red-500">
+        Graph hier her
     </div>
+    <div class="">
+        <input
+            type="range"
+            min="0"
+            max="86400"
+            step={step_size_in_s}
+            bind:value={selected_time}
+            class="range range-primary range-xs w-full"
+        />
 
-    <input
-        type="range"
-        min="0"
-        max="1439"
-        step="15"
-        bind:value={selected_time}
-        class="range range-primary range-xs"
-    />
+        <div
+            class="flex justify-between px-2 mt-2 text-xs text-base-content/50"
+        >
+            <span>|</span>
+            <span>|</span>
+            <span>|</span>
+            <span>|</span>
+            <span>|</span>
+        </div>
 
-    <div class="flex justify-between px-2 mt-2 text-xs text-base-content/50">
-        <span>|</span>
-        <span>|</span>
-        <span>|</span>
-        <span>|</span>
-        <span>|</span>
-    </div>
-
-    <div class="flex justify-between px-2 mt-1 text-xs font-mono">
-        <span>00:00</span>
-        <span>06:00</span>
-        <span>12:00</span>
-        <span>18:00</span>
-        <span>23:59</span>
+        <div class="flex justify-between px-2 mt-1 text-xs font-mono">
+            <span>00:00</span>
+            <span>06:00</span>
+            <span>12:00</span>
+            <span>18:00</span>
+            <span>23:59</span>
+        </div>
     </div>
 </div>
 
@@ -208,6 +216,7 @@
             loaded_bike_standing_times,
             selected_time,
         )}
+        style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1"
     ></Heatmap>
 {:catch error}
     {error.message}

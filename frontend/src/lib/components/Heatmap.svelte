@@ -7,7 +7,7 @@
 
     let heatLayer = $state<any>(undefined);
 
-    let { bike_positions } = $props();
+    let { bike_positions, style } = $props();
 
     onMount(async () => {
         const L = (await import("leaflet")).default;
@@ -47,4 +47,4 @@
     });
 </script>
 
-<div bind:this={mapElement} style="height: 500px; width: 100%;"></div>
+<div bind:this={mapElement} {style}></div>
