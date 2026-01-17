@@ -175,7 +175,13 @@
     class="fixed bottom-0 w-screen bg-base-200 border-base-300 border shadow-2xl"
 >
     <div class="absolute top-0 -translate-y-full right-0 bg-red-500">
-        Graph hier her
+        {#await bike_standing_times}
+            Loading Bike Standing Times...
+        {:then loaded_bike_standing_times}
+            Geladen
+        {:catch error}
+            {error.message}
+        {/await}
     </div>
     <div class="">
         <input
