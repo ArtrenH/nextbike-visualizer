@@ -165,10 +165,24 @@
 -->
 
 <!-- Time, fixed at the top right -->
-<div
-    class="fixed top-2 right-4 text-center font-mono text-5xl mb-2 font-bold text-primary bg-base-200 rounded-box p-1.5"
->
-    {formatTime(selected_time)}
+<div class="fixed top-2 right-4 hover-3d group">
+    <!-- content -->
+    <figure class="max-w-100 rounded-2xl">
+        <div
+            class="transition-all text-center font-mono text-5xl group-hover:text-9xl font-bold text-primary bg-black rounded-box p-1.5"
+        >
+            {formatTime(selected_time)}
+        </div>
+    </figure>
+    <!-- 8 empty divs needed for the 3D effect -->
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
 </div>
 
 <div
