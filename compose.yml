@@ -1,0 +1,10 @@
+services:
+    db:
+        image: postgres:14.20-trixie
+        container_name: nextbike-postgres
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_PASSWORD=Passwort123
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=nextbike

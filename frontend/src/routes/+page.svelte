@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Heatmap from "$lib/components/Heatmap.svelte";
     import { onMount } from "svelte";
 
     const API_BASE = "http://127.0.0.1:4001";
@@ -111,3 +112,5 @@
     In einem Graphen anzeigen wie viele Fahrräder gerade ausgeliehen sind (+ anzeige wo man da gerade ist von der Uhrzeit her)
     Slider für die Zeit
 -->
+
+<Heatmap></Heatmap>
