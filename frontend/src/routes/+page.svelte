@@ -9,9 +9,10 @@
         await import("cally");
     });
 
-    let selected_date = $state("");
-    let selected_city = $state("");
+    let selected_date = $state("2025-11-01");
+    let selected_city = $state("1");
     let selected_step_size = $state("1min");
+    let selected_time = $state(720);
     let step_size_in_s = $derived.by(() => {
         switch (selected_step_size) {
             case "10s":
@@ -42,6 +43,61 @@
               }[]
           >
         | undefined = $state();
+
+    let bike_standing_times = $derived.by(() => {
+        if (!selected_city || selected_city === "") return [];
+        if (!selected_date || selected_date === "") return [];
+
+        const start = `${selected_date} 00:00:00`;
+        const end = `${selected_date} 23:59:59`;
+
+        return fetch(
+            `${API_BASE}/api/active_standing_times/${selected_city}` +
+                `?timestamp_start=${start}&timestamp_end=${end}`,
+        ).then((res) => res.json());
+    });
+    let bike_trips = $derived.by(() => {});
+
+    function timeToSeconds(h, m, s) {
+        return h * 3600 + m * 60 + s;
+    }
+
+    function dateStringToSeconds(dateStr) {
+        const d = new Date(dateStr); // GMT handled automatically
+        return timeToSeconds(
+            d.getUTCHours(),
+            d.getUTCMinutes(),
+            d.getUTCSeconds(),
+        );
+    }
+
+    function isTimeInRange(targetSec, startSec, endSec) {
+        // normal range (same day)
+        if (startSec <= endSec) {
+            return targetSec >= startSec && targetSec <= endSec;
+        }
+        // crosses midnight
+        return targetSec >= startSec || targetSec <= endSec;
+    }
+
+    function get_locations(loaded_bike_standing_times, hhmmss) {
+        const targetSec = hhmmss * 60;
+
+        return loaded_bike_standing_times
+            .filter((item) => {
+                const startSec = dateStringToSeconds(item.start_time);
+                const endSec = dateStringToSeconds(item.end_time);
+                return isTimeInRange(targetSec, startSec, endSec);
+            })
+            .map((item) => [item.latitude, item.longitude]);
+    }
+
+    function formatTime(totalMinutes: number): string {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        // padStart(2, '0') macht aus "8" eine "08"
+        return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    }
 </script>
 
 <fieldset
@@ -107,10 +163,52 @@
 </fieldset>
 
 <!-- Visualisations:
-    Heatmap
     Places in Heatmap markieren
     In einem Graphen anzeigen wie viele Fahrräder gerade ausgeliehen sind (+ anzeige wo man da gerade ist von der Uhrzeit her)
-    Slider für die Zeit
+    Slider soll stepsize respecten und styling ist komisch
 -->
 
-<Heatmap></Heatmap>
+<div class="w-full max-w-lg">
+    <div class="text-center font-mono text-xl mb-2 font-bold text-primary">
+        {formatTime(selected_time)}
+    </div>
+
+    <input
+        type="range"
+        min="0"
+        max="1439"
+        step="15"
+        bind:value={selected_time}
+        class="range range-primary range-xs"
+    />
+
+    <div class="flex justify-between px-2 mt-2 text-xs text-base-content/50">
+        <span>|</span>
+        <span>|</span>
+        <span>|</span>
+        <span>|</span>
+        <span>|</span>
+    </div>
+
+    <div class="flex justify-between px-2 mt-1 text-xs font-mono">
+        <span>00:00</span>
+        <span>06:00</span>
+        <span>12:00</span>
+        <span>18:00</span>
+        <span>23:59</span>
+    </div>
+</div>
+
+{#await bike_standing_times}
+    Loading Bike Standing Times...
+{:then loaded_bike_standing_times}
+    <!-- {get_locations(loaded_bike_standing_times, "12:00:00")} -->
+    <Heatmap
+        bike_positions={get_locations(
+            loaded_bike_standing_times,
+            selected_time,
+        )}
+    ></Heatmap>
+{:catch error}
+    {error.message}
+{/await}
