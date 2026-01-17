@@ -42,16 +42,18 @@ def get_places(city_id):
         params=(city_id,),
     )
 
-def get_active_standing_times(city_uid, timestamp):
+
+def get_active_standing_times(city_uid: str, timestamp) -> list[dict]:
     return query_df(
         DATABASE_URL,
         """
         SELECT *
         FROM bike_parking
-        WHERE city_uid = %s
-        AND start_time <= %s AND end_time >= %s
+        WHERE city_uid::text = %s
+          AND start_time <= %s
+          AND end_time >= %s
         """,
-        params=(city_uid,timestamp,timestamp),
+        params=(city_uid, timestamp, timestamp),
     )
 
 def get_active_trips(city_uid, timestamp):
@@ -60,10 +62,10 @@ def get_active_trips(city_uid, timestamp):
         """
         SELECT *
         FROM bike_trips
-        WHERE (start_city_uid = %s OR end_city_uid = %s)
+        WHERE (start_city_uid::text = %s OR end_city_uid::text = %s)
         AND start_time <= %s AND end_time >= %s
         """,
-        params=(city_uid,timestamp,timestamp),
+        params=(city_uid, city_uid, timestamp, timestamp),
     )
 
 def get_standing_times_overlapping_interval(city_uid, from_ts, to_ts):
