@@ -1,5 +1,6 @@
 <script lang="ts">
     import Heatmap from "$lib/components/Heatmap.svelte";
+    import StandingBikesChart from "$lib/components/StandingBikesChart.svelte";
     import { onMount } from "svelte";
 
     const API_BASE = "http://127.0.0.1:4001";
@@ -88,6 +89,18 @@
                 return isTimeInRange(hhmmss, startSec, endSec);
             })
             .map((item) => [item.latitude, item.longitude]);
+    }
+
+    function get_graph_data(loaded_bike_standing_times) {
+        const step = 10; // 10-second intervals
+        const daySeconds = 24 * 60 * 60;
+
+        const series = [];
+        for (let t = 0; t < daySeconds; t += step) {
+            const locations = get_locations(loaded_bike_standing_times, t);
+            series.push({ t, count: locations.length });
+        }
+        return series;
     }
 
     function formatTime(totalSeconds: number): string {
@@ -188,11 +201,12 @@
 <div
     class="fixed bottom-0 w-screen bg-base-200 border-base-300 border shadow-2xl"
 >
-    <div class="absolute top-0 -translate-y-full right-0 bg-red-500">
+    <div class="absolute top-0 -translate-y-full right-0">
         {#await bike_standing_times}
             Loading Bike Standing Times...
         {:then loaded_bike_standing_times}
-            Geladen
+            <!-- <StandingBikesChart {loaded_bike_standing_times} /> -->
+            Graph to slow and buggy currently
         {:catch error}
             {error.message}
         {/await}
